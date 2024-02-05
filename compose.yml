@@ -1,0 +1,41 @@
+version: "3.7"
+
+networks:
+  waasq_telegram_bot_network:
+
+services:
+  java:
+    build: .
+    env_file:
+      - .env
+    command: sh
+    tty: true
+    ports:
+      - "48080:8080"
+    networks:
+      waasq_telegram_bot_network:
+        aliases:
+          - "api"
+  mongodb:
+    image: 'mongo:6-jammy'
+    environment:
+      MONGO_INITDB_DATABASE: chatbot
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+    ports:
+      - "27017:27017"
+    networks:
+      waasq_telegram_bot_network:
+        aliases:
+          - "mongo"
+  mqtt:
+    image: 'eclipse-mosquitto'
+    volumes:
+      - ./mosquitto:/mosquitto
+    restart: always
+    networks:
+      waasq_telegram_bot_network:
+        aliases:
+          - "mqtt"
+    ports:
+      - 1883:1883
