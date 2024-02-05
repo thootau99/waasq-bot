@@ -8,6 +8,8 @@ services:
     build: .
     env_file:
       - .env
+    volumes:
+      - .:/src/app
     command: sh
     tty: true
     ports:
