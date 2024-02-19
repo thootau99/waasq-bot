@@ -14,7 +14,9 @@ import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
+import org.springframework.integration.mqtt.support.MqttHeaders;
 import org.springframework.messaging.*;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Repository;
 
 
@@ -64,38 +66,17 @@ public class MqttClient {
         MqttPahoMessageHandler messageHandler =
                 new MqttPahoMessageHandler(clientId, mqttClientFactory());
         messageHandler.setAsync(true);
-        messageHandler.setDefaultTopic("topic1");
         return messageHandler;
     }
 
-    @Bean
-    @ServiceActivator(inputChannel = "mqttOutboundNewChannel")
-    public MessageHandler mqttOutboundTopicNew() {
-        String clientId = MqttAsyncClient.generateClientId();
-        MqttPahoMessageHandler messageHandler =
-                new MqttPahoMessageHandler(clientId, mqttClientFactory());
-        messageHandler.setAsync(true);
-        messageHandler.setDefaultTopic("aaaaa_new_topic");
-        return messageHandler;
-    }
 
     @Bean
     public MessageChannel mqttOutboundChannel() {
         return new DirectChannel();
     }
 
-    @Bean
-    public MessageChannel mqttOutboundNewChannel() {
-        return new DirectChannel();
-    }
-
     @MessagingGateway(defaultRequestChannel = "mqttOutboundChannel")
-    public interface MyGateway {
-        void sendToMqtt(String data);
-    }
-
-    @MessagingGateway(defaultRequestChannel = "mqttOutboundNewChannel")
-    public interface NewTopicOutputGateway {
-        void sendToMqtt(String data);
+    public interface MqttGateWay {
+        void sendToMqtt(String data, @Header(MqttHeaders.TOPIC) String topic);
     }
 }
